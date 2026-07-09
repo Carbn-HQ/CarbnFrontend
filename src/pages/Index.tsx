@@ -57,7 +57,7 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
     localStorage.setItem("carbn_user_email", email.trim());
     localStorage.setItem("carbn_joined_at", new Date().toISOString());
     toast({ title: `Welcome, ${firstName.trim()}.`, description: "You're in the founding beta." });
-    navigate("/dashboard");
+    // navigate("/dashboard");
   };
 
   return (
