@@ -43,21 +43,109 @@ const FoundingBenefits = () => (
   </ul>
 );
 
+const detectDevice = () => {
+  if (typeof navigator === "undefined") return "Desktop";
+  const ua = navigator.userAgent;
+  if (/Tablet|iPad/i.test(ua)) return "Tablet";
+  if (/Mobi|Android|iPhone/i.test(ua)) return "Mobile";
+  return "Desktop";
+};
+
+const detectBrowser = () => {
+  if (typeof navigator === "undefined") return "Unknown";
+  const ua = navigator.userAgent;
+  if (/Edg\//.test(ua)) return "Edge";
+  if (/OPR\/|Opera/.test(ua)) return "Opera";
+  if (/Chrome\//.test(ua) && !/Chromium/.test(ua)) return "Chrome";
+  if (/Safari\//.test(ua) && !/Chrome/.test(ua)) return "Safari";
+  if (/Firefox\//.test(ua)) return "Firefox";
+  return "Unknown";
+};
+
+const detectCountry = () => {
+  try {
+    const locale =
+      Intl.DateTimeFormat().resolvedOptions().locale ||
+      (navigator.languages && navigator.languages[0]) ||
+      navigator.language ||
+      "";
+    const region = locale.split("-")[1];
+    const map: Record<string, string> = {
+      GH: "Ghana", US: "United States", GB: "United Kingdom", NG: "Nigeria",
+      CA: "Canada", DE: "Germany", FR: "France", KE: "Kenya", ZA: "South Africa",
+      IN: "India", AU: "Australia",
+    };
+    return (region && (map[region] || region)) || "Unknown";
+  } catch {
+    return "Unknown";
+  }
+};
+
 const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const isDark = variant === "dark";
 
-  const submit = (e: React.FormEvent) => {
+  const inputClass = `w-full flex-1 rounded-xl border px-5 py-3.5 text-base outline-none placeholder:font-normal focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+    isDark
+      ? "border-white/20 bg-white/5 text-on-charcoal placeholder:text-white/60 focus:ring-offset-transparent"
+      : "border-border bg-white text-charcoal placeholder:text-muted-foreground"
+  }`;
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.includes("@") || !firstName.trim()) return;
-    localStorage.setItem("carbn_user_firstname", firstName.trim());
-    localStorage.setItem("carbn_user_email", email.trim());
-    localStorage.setItem("carbn_joined_at", new Date().toISOString());
-    toast({ title: `Welcome, ${firstName.trim()}.`, description: "You're in the founding beta." });
-    // navigate("/dashboard");
+    if (!email.includes("@") || !firstName.trim() || !lastName.trim() || submitting) return;
+    setSubmitting(true);
+
+    const payload = {
+      email: email.trim(),
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      source: "landing_page",
+      notes: "Interested in joining the CARBN beta.",
+      metadata: {
+        campaign: "carbn_beta_launch",
+        device: detectDevice(),
+        browser: detectBrowser(),
+        country: detectCountry(),
+        referrer: document.referrer || "Direct",
+      },
+    };
+
+    try {
+      const res = await fetch("https://carbnserver.onrender.com/api/v1/join-waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data?.success) {
+        localStorage.setItem("carbn_user_firstname", firstName.trim());
+        localStorage.setItem("carbn_user_lastname", lastName.trim());
+        localStorage.setItem("carbn_user_email", email.trim());
+        localStorage.setItem("carbn_joined_at", new Date().toISOString());
+        toast({ title: "Beta registration successful", description: `Welcome, ${firstName.trim()}.` });
+        navigate("/dashboard");
+      } else {
+        toast({
+          title: "Registration failed",
+          description: data?.message || "Please try again in a moment.",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({
+        title: "Network error",
+        description: "Could not reach the server. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -74,27 +162,27 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           placeholder="First name"
-          className={`w-full flex-1 rounded-xl border px-5 py-3.5 text-base outline-none placeholder:font-normal focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-            isDark
-              ? "border-white/20 bg-white/5 text-on-charcoal placeholder:text-white/60 focus:ring-offset-transparent"
-              : "border-border bg-white text-charcoal placeholder:text-muted-foreground"
-          }`}
+          className={inputClass}
         />
         <input
-          type="email"
+          type="text"
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Your email address"
-          className={`w-full flex-1 rounded-xl border px-5 py-3.5 text-base outline-none placeholder:font-normal focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-            isDark
-              ? "border-white/20 bg-white/5 text-on-charcoal placeholder:text-white/60 focus:ring-offset-transparent"
-              : "border-border bg-white text-charcoal placeholder:text-muted-foreground"
-          }`}
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          placeholder="Last name"
+          className={inputClass}
         />
       </div>
-      <PrimaryButton type="submit">
-        Join the Founding Beta <ArrowRight className="h-4 w-4" />
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Your email address"
+        className={inputClass}
+      />
+      <PrimaryButton type="submit" disabled={submitting}>
+        {submitting ? "Joining..." : (<>Join the Founding Beta <ArrowRight className="h-4 w-4" /></>)}
       </PrimaryButton>
     </form>
   );
