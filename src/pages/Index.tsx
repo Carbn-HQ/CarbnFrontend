@@ -115,6 +115,7 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
         referrer: document.referrer || "Direct",
       },
     };
+    
 
     try {
       const res = await fetch("https://carbnserver-f9eq.onrender.com/api/v1/join-waitlist", {
