@@ -117,7 +117,7 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
     };
 
     try {
-      const res = await fetch("https://carbnserver.onrender.com/api/v1/join-waitlist", {
+      const res = await fetch("https://carbnserver-f9eq.onrender.com/api/v1/join-waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
