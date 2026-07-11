@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import axios from "axios";
 import { toast } from "@/hooks/use-toast";
 
 const CompleteProfile = () => {
@@ -18,18 +19,14 @@ const CompleteProfile = () => {
     if (!firstName.trim() || !lastName.trim() || !id || submitting) return;
     setSubmitting(true);
     try {
-      const res = await fetch(
+      const response = await axios.put(
         `https://carbnserver.onrender.com/api/v1/update-waitlist-name/${id}`,
         {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            first_name: firstName.trim(),
-            last_name: lastName.trim(),
-          }),
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
         },
       );
-      const data = await res.json().catch(() => ({} as any));
+      const data = response.data;
       if (data?.success) {
         localStorage.setItem("carbn_user_firstname", firstName.trim());
         localStorage.setItem("carbn_user_lastname", lastName.trim());

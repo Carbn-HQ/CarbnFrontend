@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check, Activity, Heart, Infinity as InfinityIcon } from "lucide-react";
+import axios from "axios";
 import heroImg from "@/assets/carbn-hero.jpg";
 import aboutImg from "@/assets/carbn-about.jpg";
 import { toast } from "@/hooks/use-toast";
@@ -113,21 +114,20 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
     };
 
     try {
-      const res = await fetch("https://carbnserver.onrender.com/api/v1/join-waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json().catch(() => ({} as any));
+      const response = await axios.post(
+        "https://carbnserver.onrender.com/api/v1/join-waitlist",
+        payload,
+      );
+      const data = response.data;
       if (data?.success) {
         const id =
           data?.data?.id ?? data?.data?._id ?? data?.id ?? data?._id ?? data?.waitlist_id;
         localStorage.setItem("carbn_user_email", email.trim());
         localStorage.setItem("carbn_joined_at", new Date().toISOString());
         if (id) localStorage.setItem("carbn_waitlist_id", String(id));
-        toast({ title: "Beta registration successful", description: "An email has been sent to you, open to complete registration" });
+        toast({ title: "Beta registration successful", description: "One more step — tell us your name." });
         if (id) {
-          // navigate(`/complete-profile/${id}`);
+          navigate(`/complete-profile/${id}`);
         } else {
           toast({
             title: "Missing waitlist id",
