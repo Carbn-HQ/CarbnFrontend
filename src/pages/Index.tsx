@@ -127,7 +127,7 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
         if (id) localStorage.setItem("carbn_waitlist_id", String(id));
         toast({ title: "Beta registration successful", description: "One more step — tell us your name." });
         if (id) {
-          navigate(`/complete-profile/${id}`);
+          // navigate(`/complete-profile/${id}`);
         } else {
           toast({
             title: "Missing waitlist id",
