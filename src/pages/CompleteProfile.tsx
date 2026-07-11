@@ -34,7 +34,7 @@ const CompleteProfile = () => {
           title: "Profile updated",
           description: `Welcome, ${firstName.trim()}.`,
         });
-        navigate("/dashboard");
+        // navigate("/dashboard");
       } else {
         toast({
           title: "Update failed",
