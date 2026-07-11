@@ -125,7 +125,7 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
         localStorage.setItem("carbn_user_email", email.trim());
         localStorage.setItem("carbn_joined_at", new Date().toISOString());
         if (id) localStorage.setItem("carbn_waitlist_id", String(id));
-        toast({ title: "Beta registration successful", description: "One more step — tell us your name." });
+        toast({ title: "Beta registration successful", description: "An email was sent to you, kindly open to complete registration" });
         if (id) {
           // navigate(`/complete-profile/${id}`);
         } else {
