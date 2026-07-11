@@ -83,8 +83,6 @@ const detectCountry = () => {
 
 const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => {
   const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -98,13 +96,11 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.includes("@") || !firstName.trim() || !lastName.trim() || submitting) return;
+    if (!email.includes("@") || submitting) return;
     setSubmitting(true);
 
     const payload = {
       email: email.trim(),
-      first_name: firstName.trim(),
-      last_name: lastName.trim(),
       source: "landing_page",
       notes: "Interested in joining the CARBN beta.",
       metadata: {
@@ -115,22 +111,30 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
         referrer: document.referrer || "Direct",
       },
     };
-    
 
     try {
-      const res = await fetch("https://carbnserver-f9eq.onrender.com/api/v1/join-waitlist", {
+      const res = await fetch("https://carbnserver.onrender.com/api/v1/join-waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = await res.json().catch(() => ({} as any));
       if (data?.success) {
-        localStorage.setItem("carbn_user_firstname", firstName.trim());
-        localStorage.setItem("carbn_user_lastname", lastName.trim());
+        const id =
+          data?.data?.id ?? data?.data?._id ?? data?.id ?? data?._id ?? data?.waitlist_id;
         localStorage.setItem("carbn_user_email", email.trim());
         localStorage.setItem("carbn_joined_at", new Date().toISOString());
-        toast({ title: "Beta registration successful", description: `Welcome, ${firstName.trim()}.` });
-        // navigate("/dashboard");
+        if (id) localStorage.setItem("carbn_waitlist_id", String(id));
+        toast({ title: "Beta registration successful", description: "One more step — tell us your name." });
+        if (id) {
+          navigate(`/complete-profile/${id}`);
+        } else {
+          toast({
+            title: "Missing waitlist id",
+            description: "We could not read your waitlist id from the server.",
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "Registration failed",
@@ -156,24 +160,6 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
         isDark ? "bg-white/10 backdrop-blur" : "bg-card shadow-soft"
       }`}
     >
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <input
-          type="text"
-          required
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          placeholder="First name"
-          className={inputClass}
-        />
-        <input
-          type="text"
-          required
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          placeholder="Last name"
-          className={inputClass}
-        />
-      </div>
       <input
         type="email"
         required
@@ -188,6 +174,7 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
     </form>
   );
 };
+
 
 const Index = () => {
   return (
