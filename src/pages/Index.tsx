@@ -115,7 +115,7 @@ const WaitlistForm = ({ variant = "light" }: { variant?: "light" | "dark" }) => 
 
     try {
       const response = await axios.post(
-        "https://carbnserver.onrender.com/api/v1/join-waitlist",
+        "https://carbnserver-f9eq.onrender.com/api/v1/join-waitlist",
         payload,
       );
       const data = response.data;

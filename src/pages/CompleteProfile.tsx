@@ -20,7 +20,7 @@ const CompleteProfile = () => {
     setSubmitting(true);
     try {
       const response = await axios.put(
-        `https://carbnserver.onrender.com/api/v1/update-waitlist-name/${id}`,
+        `https://carbnserver-f9eq.onrender.com/api/v1/update-waitlist-name/${id}`,
         {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
