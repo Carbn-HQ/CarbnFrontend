@@ -27,14 +27,15 @@ const RegistrationComplete = () => {
             Registration completed
           </h1>
           <p className="mt-2 text-muted-foreground">
-            You have joined the Carbn Founding Beta.
+             Thanks, {firstName}. Your application to join the CARBN Founding Beta
+  has been submitted successfully.
           </p>
 
-          {firstName && (
-            <p className="mt-4 text-sm font-medium text-charcoal">
-              Welcome, {firstName}.
-            </p>
-          )}
+         
+          <p>
+            The CARBN team will review your application and email you with the next step.
+          </p>
+          
 
           <a
             href="/"
